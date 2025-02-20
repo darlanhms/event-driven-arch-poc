@@ -23,3 +23,22 @@ model Event {
 
   @@map("event")
 }
+
+model Entity {
+  id   String @id @db.Uuid
+  name String
+
+  phoneNumbers PhoneNumber[]
+
+  @@map("entity")
+}
+
+model PhoneNumber {
+  id       String @id @db.Uuid
+  number   String
+  entityId String @map("entity_id") @db.Uuid
+
+  entity Entity @relation(fields: [entityId], references: [id])
+
+  @@map("phone_number")
+}
