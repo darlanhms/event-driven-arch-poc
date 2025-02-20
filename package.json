@@ -1,0 +1,33 @@
+{
+  "name": "event-driven-arch-poc",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "migration:create": "pnpx prisma migrate dev",
+    "migration:run": "pnpx prisma generate",
+    "seed:run": "pnpx prisma db seed",
+    "studio": "pnpx prisma studio"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.0",
+    "express": "^4.21.2",
+    "prisma": "^6.4.0"
+  }
+}
