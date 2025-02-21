@@ -1,5 +1,6 @@
 import express from 'express';
 
+import { amqpClient } from './amqp';
 import createEntity from './useCases/createEntity';
 
 const app = express();
@@ -15,3 +16,5 @@ app.post('/entities', async (req, res) => {
 app.listen(process.env.PORT, () => {
   console.info('APP listening on port', process.env.PORT);
 });
+
+amqpClient.connect();

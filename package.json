@@ -13,6 +13,7 @@
     "studio": "pnpx prisma studio"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.6",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.4",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -27,6 +28,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.4.0",
+    "amqplib": "^0.10.5",
     "express": "^4.21.2",
     "prisma": "^6.4.0",
     "uuid": "^11.1.0",

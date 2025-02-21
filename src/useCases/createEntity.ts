@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
 
+import { amqpClient } from '../amqp';
 import { prisma } from '../prisma';
 
 const createEntitySchema = z.object({
@@ -18,12 +19,24 @@ export default async function createEntity(rawData: z.infer<typeof createEntityS
     },
   });
 
-  await prisma.phoneNumber.create({
+  const phoneNumber = await prisma.phoneNumber.create({
     data: {
       id: uuid(),
       number: data.phoneNumber,
       entityId: entity.id,
     },
+  });
+
+  await amqpClient.sendEvent({
+    data: entity,
+    type: 'insert',
+    timestamp: new Date().getTime(),
+  });
+
+  await amqpClient.sendEvent({
+    data: phoneNumber,
+    type: 'insert',
+    timestamp: new Date().getTime(),
   });
 
   const persisted = await prisma.entity.findUnique({
