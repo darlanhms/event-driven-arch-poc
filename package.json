@@ -7,8 +7,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
+    "dedicated:dev": "tsx watch --env-file=.env.dedicated src/server.ts",
     "migration:create": "pnpx prisma migrate dev",
     "migration:run": "pnpx prisma generate",
+    "dedicated:migration:create": "dotenv -e .env.dedicated -- pnpx prisma migrate dev",
     "seed:run": "pnpx prisma db seed",
     "studio": "pnpx prisma studio"
   },
@@ -29,6 +31,7 @@
   "dependencies": {
     "@prisma/client": "^6.4.0",
     "amqplib": "^0.10.5",
+    "dotenv-cli": "^8.0.0",
     "express": "^4.21.2",
     "prisma": "^6.4.0",
     "uuid": "^11.1.0",

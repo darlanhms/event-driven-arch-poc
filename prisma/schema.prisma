@@ -20,6 +20,7 @@ model Event {
   data      Json
   timestamp DateTime @default(now())
   synced    Boolean  @default(false)
+  entity    String
 
   @@map("event")
 }

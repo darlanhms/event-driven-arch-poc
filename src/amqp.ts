@@ -1,5 +1,7 @@
 import { Channel, connect, Connection, Options } from 'amqplib';
 
+import { prisma } from './prisma';
+
 const RECONNECT_TIMEOUT = 1000 * 5;
 
 type QueuePayloadType = number | string | Record<any, any>;
@@ -9,10 +11,20 @@ interface RabbitMQConsumer<T> {
   handle(data: T): Promise<void> | void;
 }
 
-interface EventQueuePayload {
-  type: string;
+type EventType = 'insert';
+
+type EventEntity = 'entity' | 'phoneNumber';
+
+export interface EventQueuePayload {
+  eventId: string;
+  type: EventType;
   data: Record<any, any>;
   timestamp: number;
+  entity: EventEntity;
+}
+
+interface EventAckPayload {
+  eventId: string;
 }
 
 class AMQPClient {
@@ -54,14 +66,25 @@ class AMQPClient {
 
       this.startListeners();
 
-      const eventConsumer: RabbitMQConsumer<EventQueuePayload> = {
-        queue: 'event',
-        handle(data) {
-          console.info(data);
-        },
-      };
+      if (process.env.DEDICATED_ENV) {
+        const eventConsumer: RabbitMQConsumer<EventQueuePayload> = {
+          queue: 'event',
+          handle: async (data) => {
+            await this.handleEvent(data);
+          },
+        };
 
-      this.consume(eventConsumer);
+        this.consume(eventConsumer);
+      } else {
+        const ackConsumer: RabbitMQConsumer<EventAckPayload> = {
+          queue: 'event_acknowledgment',
+          handle: async (data) => {
+            await this.handleEventAck(data);
+          },
+        };
+
+        this.consume(ackConsumer);
+      }
 
       console.info(`[RabbitMQ] Connected to AMQP (${hostDesc})`);
     } catch (error) {
@@ -147,6 +170,40 @@ class AMQPClient {
 
   async sendEvent(payload: EventQueuePayload): Promise<void> {
     return this.send('event', payload);
+  }
+
+  private async handleEvent(payload: EventQueuePayload) {
+    console.info('Event received', payload);
+
+    switch (payload.type) {
+      case `insert`:
+        (prisma[payload.entity].create as any)({
+          data: payload.data,
+        }).catch((error: unknown) => console.error('Error while inserting entity', error));
+        break;
+      default:
+        console.info('Event with invalid type was not processed', payload);
+        break;
+    }
+
+    await this.send('event_acknowledgment', {
+      eventId: payload.eventId,
+    });
+
+    console.info('Event processed', payload.eventId);
+  }
+
+  private async handleEventAck(payload: EventAckPayload) {
+    await prisma.event.update({
+      where: {
+        id: payload.eventId,
+      },
+      data: {
+        synced: true,
+      },
+    });
+
+    console.info('Acknowledged event', payload.eventId);
   }
 }
 
