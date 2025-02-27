@@ -14,7 +14,7 @@ export default async function propagateEvent(event: Omit<EventQueuePayload, 'eve
 
     await amqpClient.sendEvent({
       eventId,
-      timestamp: timestamp.getDate(),
+      timestamp: timestamp.getTime(),
       ...event,
     });
   });
